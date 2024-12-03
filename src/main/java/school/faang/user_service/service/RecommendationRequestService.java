@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.RecommendationRequestDto;
+import school.faang.user_service.dto.RejectionDto;
+import school.faang.user_service.dto.RequestFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
@@ -13,7 +15,10 @@ import school.faang.user_service.repository.recommendation.RecommendationRequest
 import school.faang.user_service.repository.recommendation.SkillRequestRepository;
 
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
+
+import static school.faang.user_service.entity.RequestStatus.REJECTED;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +39,31 @@ public class RecommendationRequestService {
 
         recommendationRequestRepository.save(request);
         skillRequestRepository.saveAll(request.getSkills());
+    }
+
+    public List<RecommendationRequestDto> getRecommendationRequests(RequestFilterDto filters) {
+        List<RecommendationRequest> outRequests = filterRecommendationRequests(filters);
+
+        return outRequests.stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
+    public RecommendationRequestDto getRecommendationRequest(Long id) {
+        return mapper.toDto(recommendationRequestRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Request not found")
+        ));
+    }
+
+    public void rejectRequest(Long id, RejectionDto rejectionDto) {
+        RecommendationRequest request = recommendationRequestRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Request not found")
+        );
+
+        if (!request.getStatus().equals(REJECTED)) {
+            request.setStatus(REJECTED);
+            request.setRejectionReason(rejectionDto.getRejectionReason());
+        }
     }
 
     private void validationExistsRequesterAndReceiver(RecommendationRequestDto recommendationRequestDto) {
@@ -77,5 +107,22 @@ public class RecommendationRequestService {
                 throw new EntityNotFoundException();
             }
         }
+    }
+
+    private List<RecommendationRequest> filterRecommendationRequests(RequestFilterDto filters) {
+        List<RecommendationRequest> requests = recommendationRequestRepository.findAll();
+        List<RecommendationRequest> outRequests = new ArrayList<>();
+
+        for (RecommendationRequest request : requests) {
+            if (filters.getRequesterName() != null && request.getRequester().getUsername().contains(filters.getRequesterName())) {
+                outRequests.add(request);
+            }
+
+            if (filters.getReceiverName() != null && request.getReceiver().getUsername().contains(filters.getReceiverName())) {
+                outRequests.add(request);
+            }
+        }
+
+        return outRequests;
     }
 }
