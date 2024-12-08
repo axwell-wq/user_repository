@@ -5,7 +5,6 @@ import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.RecommendationRequestDto;
 import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.dto.RequestFilterDto;
-import school.faang.user_service.entity.recommendation.RecommendationRequest;
 import school.faang.user_service.service.RecommendationRequestService;
 
 import java.util.List;
