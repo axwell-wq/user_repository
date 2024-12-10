@@ -15,4 +15,8 @@ public class RecommendationController {
     public void create(RecommendationDto recommendation) {
         recommendationService.create(recommendation);
     }
+
+    public RecommendationDto updateRecommendation(RecommendationDto updated) {
+        return recommendationService.update(updated);
+    }
 }

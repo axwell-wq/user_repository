@@ -1,17 +1,20 @@
 package school.faang.user_service.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.RecommendationDto;
 import school.faang.user_service.dto.SkillOfferDto;
 import school.faang.user_service.entity.recommendation.Recommendation;
+import school.faang.user_service.entity.recommendation.SkillOffer;
+import school.faang.user_service.mapper.MapperRecommendationDto;
 import school.faang.user_service.mapper.MapperSkillOfferDto;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.validator.Validation;
 
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -22,11 +25,12 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final SkillOfferRepository skillOfferRepository;
     private final Validation validation;
     private final MapperSkillOfferDto mapperSkillOfferDto;
+    private final MapperRecommendationDto mapperRecommendationDto;
 
     @Override
     public void create(RecommendationDto recommendation) {
         validation.giveRecommendation(recommendation);
-        spamCheck(recommendation);
+        validation.spamCheck(recommendation);
         existsSkillOffer(recommendation);
         recommendationRepository.create(recommendation.getAuthorId(), recommendation.getReceiverId(),
                 recommendation.getContent());
@@ -36,19 +40,25 @@ public class RecommendationServiceImpl implements RecommendationService {
         }
     }
 
-    private void spamCheck(RecommendationDto recommendation) {
-        List<Recommendation> recommendationList = recommendationRepository
+    @Override
+    public RecommendationDto update(RecommendationDto recommendation) {
+        Recommendation recommendationEntity = recommendationRepository.findById(recommendation.getId()).orElseThrow(
+                () -> new EntityNotFoundException("recommendation not found"));
+
+        checkAuthentication(recommendation, recommendationEntity);
+
+        skillOfferRepository.deleteAllByRecommendationId(recommendation.getId());
+
+        recommendationEntity.setContent(recommendation.getContent());
+        recommendationEntity.setSkillOffers(mapSkillOffersDto(recommendation));
+
+        return mapperRecommendationDto.toDto(recommendationRepository.save(recommendationEntity));
+    }
+
+    @Override
+    public List<Recommendation> getAllRecommendationBetweenAuthorIdAndReceiverId(RecommendationDto recommendation) {
+        return recommendationRepository
                 .findByAuthorIdAndReceiverId(recommendation.getAuthorId(), recommendation.getReceiverId());
-
-        recommendationList
-                .forEach(recomm -> {
-                    long dateTimeRecomm = ChronoUnit.MONTHS.between(recomm.getCreatedAt(),
-                            recommendation.getCreatedAt());
-
-                    if (dateTimeRecomm < 6) {
-                        throw new IllegalArgumentException("It has not been 6 months since the last recommendation");
-                    }
-                });
     }
 
     private void existsSkillOffer(RecommendationDto recommendation) {
@@ -56,6 +66,22 @@ public class RecommendationServiceImpl implements RecommendationService {
             if (!skillOfferRepository.existsById(skill.getId())) {
                 throw new IllegalArgumentException("Skill offer does not exist");
             }
+        }
+    }
+
+    private List<SkillOffer> mapSkillOffersDto(RecommendationDto recommendation) {
+        List<SkillOffer> skillOffers = new ArrayList<>();
+
+        for (SkillOfferDto dto : recommendation.getSkillOffers()) {
+            skillOffers.add(mapperSkillOfferDto.toEntity(dto));
+        }
+
+        return skillOffers;
+    }
+
+    private void checkAuthentication(RecommendationDto recommendation, Recommendation recommendationEntity) {
+        if (!recommendation.getAuthorId().equals(recommendationEntity.getAuthor().getId())) {
+            throw new IllegalArgumentException("Author id mismatch");
         }
     }
 }
