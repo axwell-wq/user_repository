@@ -3,6 +3,9 @@ package school.faang.user_service.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import school.faang.user_service.dto.RecommendationDto;
 import school.faang.user_service.dto.SkillOfferDto;
@@ -56,9 +59,43 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
+    public void deleteRecommendation(Long id) {
+        recommendationRepository.deleteById(id);
+    }
+
+    @Override
     public List<Recommendation> getAllRecommendationBetweenAuthorIdAndReceiverId(RecommendationDto recommendation) {
         return recommendationRepository
                 .findByAuthorIdAndReceiverId(recommendation.getAuthorId(), recommendation.getReceiverId());
+    }
+
+    @Override
+    public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Recommendation> page = recommendationRepository.findAllByReceiverId(receiverId, pageable);
+
+        List<RecommendationDto> outList = new ArrayList<>();
+
+        if (page.hasContent()) {
+            for (Recommendation recommendation : page) {
+                outList.add(mapperRecommendationDto.toDto(recommendation));
+            }
+        }
+
+        return outList;
+    }
+
+    @Override
+    public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Recommendation> page = recommendationRepository.findAllByAuthorId(authorId, pageable);
+        List<RecommendationDto> outList = new ArrayList<>();
+        if (page.hasContent()) {
+            for (Recommendation recommendation : page) {
+                outList.add(mapperRecommendationDto.toDto(recommendation));
+            }
+        }
+        return outList;
     }
 
     private void existsSkillOffer(RecommendationDto recommendation) {

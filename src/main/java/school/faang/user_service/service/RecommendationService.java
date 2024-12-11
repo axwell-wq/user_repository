@@ -12,4 +12,10 @@ public interface RecommendationService {
     RecommendationDto update(RecommendationDto recommendationDto);
 
     List<Recommendation> getAllRecommendationBetweenAuthorIdAndReceiverId(RecommendationDto recommendation);
+
+    void deleteRecommendation(Long id);
+
+    List<RecommendationDto> getAllUserRecommendations(long receiverId);
+
+    List<RecommendationDto> getAllGivenRecommendations(long authorId);
 }
