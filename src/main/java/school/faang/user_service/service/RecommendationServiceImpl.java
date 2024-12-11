@@ -15,7 +15,7 @@ import school.faang.user_service.mapper.MapperRecommendationDto;
 import school.faang.user_service.mapper.MapperSkillOfferDto;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.validator.Validation;
+import school.faang.user_service.validator.Validator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,14 +26,14 @@ import java.util.List;
 public class RecommendationServiceImpl implements RecommendationService {
     private final RecommendationRepository recommendationRepository;
     private final SkillOfferRepository skillOfferRepository;
-    private final Validation validation;
+    private final Validator validator;
     private final MapperSkillOfferDto mapperSkillOfferDto;
     private final MapperRecommendationDto mapperRecommendationDto;
 
     @Override
     public void create(RecommendationDto recommendation) {
-        validation.giveRecommendation(recommendation);
-        validation.spamCheck(recommendation);
+        validator.giveRecommendation(recommendation);
+        validator.spamCheck(recommendation);
         existsSkillOffer(recommendation);
         recommendationRepository.create(recommendation.getAuthorId(), recommendation.getReceiverId(),
                 recommendation.getContent());
@@ -70,31 +70,28 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public List<RecommendationDto> getAllUserRecommendations(long receiverId) {
+    public List<RecommendationDto> getAllUserRecommendations(Long receiverId) {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Recommendation> page = recommendationRepository.findAllByReceiverId(receiverId, pageable);
 
-        List<RecommendationDto> outList = new ArrayList<>();
-
-        if (page.hasContent()) {
-            for (Recommendation recommendation : page) {
-                outList.add(mapperRecommendationDto.toDto(recommendation));
-            }
-        }
-
-        return outList;
+        return getListRecommendationDto(page);
     }
 
     @Override
-    public List<RecommendationDto> getAllGivenRecommendations(long authorId) {
+    public List<RecommendationDto> getAllGivenRecommendations(Long authorId) {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Recommendation> page = recommendationRepository.findAllByAuthorId(authorId, pageable);
+
+        return getListRecommendationDto(page);
+    }
+
+    private List<RecommendationDto> getListRecommendationDto(Page<Recommendation> page) {
         List<RecommendationDto> outList = new ArrayList<>();
-        if (page.hasContent()) {
-            for (Recommendation recommendation : page) {
-                outList.add(mapperRecommendationDto.toDto(recommendation));
-            }
+
+        for (Recommendation recommendation : page) {
+            outList.add(mapperRecommendationDto.toDto(recommendation));
         }
+
         return outList;
     }
 
