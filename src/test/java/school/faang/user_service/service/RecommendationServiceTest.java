@@ -1,5 +1,7 @@
 package school.faang.user_service.service;
 
+import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.action.internal.EntityActionVetoException;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,15 +12,23 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import school.faang.user_service.dto.RecommendationDto;
 import school.faang.user_service.dto.SkillOfferDto;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.Recommendation;
+import school.faang.user_service.entity.recommendation.SkillOffer;
 import school.faang.user_service.mapper.MapperRecommendationDto;
 import school.faang.user_service.mapper.MapperSkillOfferDto;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.validator.Validator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +56,8 @@ public class RecommendationServiceTest {
     private SkillOfferDto secondSkillDto;
     private RecommendationDto dto;
     private Recommendation recommendation;
+    private User user;
+    private List<SkillOffer> skillOffers;
 
     @BeforeEach
     public void setUp() {
@@ -70,6 +82,23 @@ public class RecommendationServiceTest {
                 .content("Test content")
                 .skillOffers(listSkillOfferDto)
                 .build();
+
+        User user1 = new User();
+        User user2 = new User();
+        user1.setId(1L);
+
+        SkillOffer skillOffer1 = new SkillOffer();
+        SkillOffer skillOffer2 = new SkillOffer();
+
+        List<SkillOffer> skillOffers = List.of(skillOffer1, skillOffer2);
+
+        recommendation = Recommendation.builder()
+                .id(dto.getId())
+                .author(user1)
+                .receiver(user2)
+                .content("Old content")
+                .skillOffers(skillOffers)
+                .build();
     }
 
     @Test
@@ -84,9 +113,61 @@ public class RecommendationServiceTest {
 
     @Test
     public void createFalseTest() {
-        Assert.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> recommendationService.create(dto)
         );
+    }
+
+    @Test
+    public void updateFalseTest() {
+        when(recommendationRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> recommendationService.update(dto)
+        );
+    }
+
+    @Test
+    public void updateTrueTest() {
+        when(recommendationRepository.findById(dto.getId())).thenReturn(Optional.of(recommendation));
+        doNothing().when(skillOfferRepository).deleteAllByRecommendationId(1L);
+
+        RecommendationDto updatedDto = new RecommendationDto();
+        updatedDto.setId(1L);
+        updatedDto.setContent("Test content");
+
+        when(mapperRecommendationDto.toDto(any())).thenReturn(updatedDto);
+
+        RecommendationDto result = recommendationService.update(dto);
+
+        assertNotNull(result);
+        assertEquals("Test content", result.getContent());
+        verify(recommendationRepository, times(1)).save(any());
+        verify(skillOfferRepository, times(1)).deleteAllByRecommendationId(1L);
+    }
+
+    @Test
+    public void deleteRecommendationTest() {
+        doNothing().when(recommendationRepository).deleteById(1L);
+
+        recommendationService.deleteRecommendation(1L);
+
+        verify(recommendationRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    public void getListRecommendationTest() {
+        when(recommendationRepository.findByAuthorIdAndReceiverId(1L, 2L))
+                .thenReturn(List.of(recommendation));
+
+        List<Recommendation> result = recommendationService.getAllRecommendationBetweenAuthorIdAndReceiverId(dto);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Old content", result.get(0).getContent());
+
+        verify(recommendationRepository, times(1)).findByAuthorIdAndReceiverId(1L, 2L);
     }
 }

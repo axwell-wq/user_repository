@@ -44,16 +44,16 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public RecommendationDto update(RecommendationDto recommendation) {
-        Recommendation recommendationEntity = recommendationRepository.findById(recommendation.getId()).orElseThrow(
-                () -> new EntityNotFoundException("recommendation not found"));
+    public RecommendationDto update(RecommendationDto recommendationDto) {
+        Recommendation recommendationEntity = recommendationRepository.findById(recommendationDto.getId()).orElseThrow(
+                () -> new EntityNotFoundException("recommendationDto not found"));
 
-        checkAuthentication(recommendation, recommendationEntity);
+        checkAuthentication(recommendationDto, recommendationEntity);
 
-        skillOfferRepository.deleteAllByRecommendationId(recommendation.getId());
+        skillOfferRepository.deleteAllByRecommendationId(recommendationDto.getId());
 
-        recommendationEntity.setContent(recommendation.getContent());
-        recommendationEntity.setSkillOffers(mapSkillOffersDto(recommendation));
+        recommendationEntity.setContent(recommendationDto.getContent());
+        recommendationEntity.setSkillOffers(mapSkillOffersDto(recommendationDto));
 
         return mapperRecommendationDto.toDto(recommendationRepository.save(recommendationEntity));
     }
