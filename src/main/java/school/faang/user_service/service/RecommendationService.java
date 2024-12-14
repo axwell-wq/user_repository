@@ -15,7 +15,7 @@ public interface RecommendationService {
 
     void deleteRecommendation(Long id);
 
-    List<RecommendationDto> getAllUserRecommendations(Long receiverId);
+    List<RecommendationDto> getRecommendationsByReceiverId(Long receiverId);
 
-    List<RecommendationDto> getAllGivenRecommendations(Long authorId);
+    List<RecommendationDto> getRecommendationsByAuthorId(Long authorId);
 }

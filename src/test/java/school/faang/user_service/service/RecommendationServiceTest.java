@@ -10,6 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import school.faang.user_service.dto.RecommendationDto;
 import school.faang.user_service.dto.SkillOfferDto;
 import school.faang.user_service.entity.User;
@@ -79,13 +83,14 @@ public class RecommendationServiceTest {
                 .id(1L)
                 .authorId(1L)
                 .receiverId(2L)
-                .content("Test content")
+                .content("Old content")
                 .skillOffers(listSkillOfferDto)
                 .build();
 
         User user1 = new User();
         User user2 = new User();
         user1.setId(1L);
+        user2.setId(2L);
 
         SkillOffer skillOffer1 = new SkillOffer();
         SkillOffer skillOffer2 = new SkillOffer();
@@ -169,5 +174,25 @@ public class RecommendationServiceTest {
         assertEquals("Old content", result.get(0).getContent());
 
         verify(recommendationRepository, times(1)).findByAuthorIdAndReceiverId(1L, 2L);
+    }
+
+    @Test
+    public void getRecommendationsByReceiverIdTest() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Recommendation> page = new PageImpl<>(List.of(recommendation));
+
+        when(recommendationRepository.findAllByReceiverId(2L, pageable)).thenReturn(page);
+        when(mapperRecommendationDto.toDto(recommendation)).thenReturn(dto);
+
+        List<RecommendationDto> result = recommendationService.getRecommendationsByReceiverId(2L);
+
+        assertNotNull(result.get(0));
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getAuthorId());
+        assertEquals(2L, result.get(0).getReceiverId());
+        assertEquals("Old content", result.get(0).getContent());
+
+        verify(recommendationRepository, times(1)).findAllByReceiverId(2L, pageable);
+        verify(mapperRecommendationDto, times(1)).toDto(recommendation);
     }
 }

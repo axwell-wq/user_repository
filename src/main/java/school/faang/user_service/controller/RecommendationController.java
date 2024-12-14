@@ -26,11 +26,11 @@ public class RecommendationController {
         recommendationService.deleteRecommendation(id);
     }
 
-    public List<RecommendationDto> getAllUserRecommendations(Long receiverId) {
-        return recommendationService.getAllUserRecommendations(receiverId);
+    public List<RecommendationDto> getRecommendationsByReceiverId(Long receiverId) {
+        return recommendationService.getRecommendationsByReceiverId(receiverId);
     }
 
-    public List<RecommendationDto> getAllGivenRecommendations(Long authorId) {
-        return recommendationService.getAllGivenRecommendations(authorId);
+    public List<RecommendationDto> getRecommendationsByAuthorId(Long authorId) {
+        return recommendationService.getRecommendationsByReceiverId(authorId);
     }
 }

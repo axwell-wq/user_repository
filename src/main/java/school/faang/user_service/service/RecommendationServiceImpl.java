@@ -70,7 +70,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public List<RecommendationDto> getAllUserRecommendations(Long receiverId) {
+    public List<RecommendationDto> getRecommendationsByReceiverId(Long receiverId) {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Recommendation> page = recommendationRepository.findAllByReceiverId(receiverId, pageable);
 
@@ -78,7 +78,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public List<RecommendationDto> getAllGivenRecommendations(Long authorId) {
+    public List<RecommendationDto> getRecommendationsByAuthorId(Long authorId) {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Recommendation> page = recommendationRepository.findAllByAuthorId(authorId, pageable);
 
