@@ -18,10 +18,4 @@ public interface MapperUserDto {
     @Mapping(source = "mentorsId", target = "mentors", ignore = true)
     @Mapping(source = "menteesId", target = "mentees", ignore = true)
     User toEntity(UserDto userDto);
-
-    List<Long> toListIdUsers(List<User> users);
-
-    List<UserDto> toListDtoUsers(List<User> users);
-
-    List<User> toUserDto(List<UserDto> userDtos);
 }
