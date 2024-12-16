@@ -11,7 +11,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class Validator {
+public class ValidatorRecommendation {
 
     private final RecommendationService recommendationService;
 

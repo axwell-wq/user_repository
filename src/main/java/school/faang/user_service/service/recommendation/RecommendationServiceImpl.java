@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.recommendation;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,8 @@ import school.faang.user_service.mapper.MapperRecommendationDto;
 import school.faang.user_service.mapper.MapperSkillOfferDto;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.validator.Validator;
+import school.faang.user_service.service.RecommendationService;
+import school.faang.user_service.validator.ValidatorRecommendation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,14 +27,14 @@ import java.util.List;
 public class RecommendationServiceImpl implements RecommendationService {
     private final RecommendationRepository recommendationRepository;
     private final SkillOfferRepository skillOfferRepository;
-    private final Validator validator;
+    private final ValidatorRecommendation validatorRecommendation;
     private final MapperSkillOfferDto mapperSkillOfferDto;
     private final MapperRecommendationDto mapperRecommendationDto;
 
     @Override
     public void create(RecommendationDto recommendation) {
-        validator.giveRecommendation(recommendation);
-        validator.spamCheck(recommendation);
+        validatorRecommendation.giveRecommendation(recommendation);
+        validatorRecommendation.spamCheck(recommendation);
         existsSkillOffer(recommendation);
         recommendationRepository.create(recommendation.getAuthorId(), recommendation.getReceiverId(),
                 recommendation.getContent());

@@ -1,8 +1,6 @@
 package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.hibernate.action.internal.EntityActionVetoException;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,10 +21,9 @@ import school.faang.user_service.mapper.MapperRecommendationDto;
 import school.faang.user_service.mapper.MapperSkillOfferDto;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.validator.Validator;
+import school.faang.user_service.service.recommendation.RecommendationServiceImpl;
+import school.faang.user_service.validator.ValidatorRecommendation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,7 +42,7 @@ public class RecommendationServiceTest {
     private SkillOfferRepository skillOfferRepository;
 
     @Mock
-    private Validator validator;
+    private ValidatorRecommendation validatorRecommendation;
 
     @Spy
     private MapperSkillOfferDto mapperSkillOfferDto;
