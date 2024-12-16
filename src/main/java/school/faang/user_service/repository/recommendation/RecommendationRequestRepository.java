@@ -3,8 +3,10 @@ package school.faang.user_service.repository.recommendation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,4 +19,8 @@ public interface RecommendationRequestRepository extends JpaRepository<Recommend
             LIMIT 1
             """)
     Optional<RecommendationRequest> findLatestPendingRequest(long requesterId, long receiverId);
+
+    boolean findByRequesterAndReceiver(User requester, User receiver);
+
+    List<RecommendationRequest> findByRequesterIdAndReceiverId(long requesterId, long receiverId);
 }
