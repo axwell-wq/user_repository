@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.dto.RecommendationDto;
 import school.faang.user_service.service.RecommendationService;
-import school.faang.user_service.service.RecommendationServiceImpl;
 
 import java.util.List;
 
