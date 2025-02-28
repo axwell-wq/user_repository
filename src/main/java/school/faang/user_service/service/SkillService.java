@@ -1,6 +1,6 @@
 package school.faang.user_service.service;
 
-import school.faang.user_service.skill_dto.SkillDto;
+import school.faang.user_service.dto.SkillDto;
 
 import java.util.List;
 

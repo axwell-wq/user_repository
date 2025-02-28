@@ -2,7 +2,7 @@ package school.faang.user_service.validator.recommendation;
 
 import org.springframework.stereotype.Component;
 import school.faang.user_service.exception.DataValidationException;
-import school.faang.user_service.skill_dto.SkillDto;
+import school.faang.user_service.dto.SkillDto;
 
 @Component
 public class SkillValidator {

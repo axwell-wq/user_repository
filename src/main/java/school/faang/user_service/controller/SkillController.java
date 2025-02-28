@@ -3,7 +3,7 @@ package school.faang.user_service.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import school.faang.user_service.service.SkillService;
-import school.faang.user_service.skill_dto.SkillDto;
+import school.faang.user_service.dto.SkillDto;
 
 import java.util.List;
 
