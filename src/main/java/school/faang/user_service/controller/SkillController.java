@@ -2,21 +2,25 @@ package school.faang.user_service.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 import school.faang.user_service.service.SkillService;
 import school.faang.user_service.skill_dto.SkillDto;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/skills")
 public class SkillController {
     private final SkillService skillService;
 
-    public SkillDto create(SkillDto skillDto) {
+    @PostMapping("/create")
+    public SkillDto create(@RequestBody SkillDto skillDto) {
         return skillService.create(skillDto);
     }
 
-    public List<SkillDto> getUserSkills(Long userId) {
+    @GetMapping("/user/{userId}")
+    public List<SkillDto> getUserSkills(@PathVariable Long userId) {
         return skillService.getUserSkills(userId);
     }
 }
