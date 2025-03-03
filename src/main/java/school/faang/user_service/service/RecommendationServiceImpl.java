@@ -15,8 +15,8 @@ import school.faang.user_service.mapper.MapperRecommendationDto;
 import school.faang.user_service.mapper.MapperSkillOfferDto;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.validator.Validator;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,14 +26,13 @@ import java.util.List;
 public class RecommendationServiceImpl implements RecommendationService {
     private final RecommendationRepository recommendationRepository;
     private final SkillOfferRepository skillOfferRepository;
-    private final Validator validator;
     private final MapperSkillOfferDto mapperSkillOfferDto;
     private final MapperRecommendationDto mapperRecommendationDto;
 
     @Override
     public void create(RecommendationDto recommendation) {
-        validator.giveRecommendation(recommendation);
-        validator.spamCheck(recommendation);
+        giveRecommendation(recommendation);
+        spamCheck(recommendation);
         existsSkillOffer(recommendation);
         recommendationRepository.create(recommendation.getAuthorId(), recommendation.getReceiverId(),
                 recommendation.getContent());
@@ -117,5 +116,26 @@ public class RecommendationServiceImpl implements RecommendationService {
         if (!recommendation.getAuthorId().equals(recommendationEntity.getAuthor().getId())) {
             throw new IllegalArgumentException("Author id mismatch");
         }
+    }
+
+    private void giveRecommendation(RecommendationDto recommendation) {
+        if (recommendation.getContent() == null || recommendation.getContent().isBlank()) {
+            throw new IllegalArgumentException("this content is blank");
+        }
+    }
+
+    private void spamCheck(RecommendationDto recommendation) {
+        List<Recommendation> recommendationList =
+                getAllRecommendationBetweenAuthorIdAndReceiverId(recommendation);
+
+        recommendationList
+                .forEach(recomm -> {
+                    long dateTimeRecomm = ChronoUnit.MONTHS.between(recomm.getCreatedAt(),
+                            recommendation.getCreatedAt());
+
+                    if (dateTimeRecomm < 6) {
+                        throw new IllegalArgumentException("It has not been 6 months since the last recommendation");
+                    }
+                });
     }
 }
