@@ -15,8 +15,9 @@ import school.faang.user_service.mapper.MapperRecommendationDto;
 import school.faang.user_service.mapper.MapperSkillOfferDto;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
-import school.faang.user_service.validator.Validator;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,21 +26,20 @@ import java.util.List;
 @Service
 public class RecommendationServiceImpl implements RecommendationService {
     private final RecommendationRepository recommendationRepository;
-    private final SkillOfferRepository skillOfferRepository;
-    private final Validator validator;
+    private final SkillOfferRepository skillRepository;
     private final MapperSkillOfferDto mapperSkillOfferDto;
     private final MapperRecommendationDto mapperRecommendationDto;
 
     @Override
     public void create(RecommendationDto recommendation) {
-        validator.giveRecommendation(recommendation);
-        validator.spamCheck(recommendation);
+        giveRecommendation(recommendation);
+        spamCheck(recommendation);
         existsSkillOffer(recommendation);
         recommendationRepository.create(recommendation.getAuthorId(), recommendation.getReceiverId(),
                 recommendation.getContent());
 
         for (SkillOfferDto dto : recommendation.getSkillOffers()) {
-            skillOfferRepository.save(mapperSkillOfferDto.toEntity(dto));
+            skillRepository.save(mapperSkillOfferDto.toEntity(dto));
         }
     }
 
@@ -50,7 +50,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         checkAuthentication(recommendationDto, recommendationEntity);
 
-        skillOfferRepository.deleteAllByRecommendationId(recommendationDto.getId());
+        skillRepository.deleteAllByRecommendationId(recommendationDto.getId());
 
         recommendationEntity.setContent(recommendationDto.getContent());
         recommendationEntity.setSkillOffers(mapSkillOffersDto(recommendationDto));
@@ -97,7 +97,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     private void existsSkillOffer(RecommendationDto recommendation) {
         for (SkillOfferDto skill : recommendation.getSkillOffers()) {
-            if (!skillOfferRepository.existsById(skill.getId())) {
+            if (!skillRepository.existsById(skill.getId())) {
                 throw new IllegalArgumentException("Skill offer does not exist");
             }
         }
@@ -117,5 +117,26 @@ public class RecommendationServiceImpl implements RecommendationService {
         if (!recommendation.getAuthorId().equals(recommendationEntity.getAuthor().getId())) {
             throw new IllegalArgumentException("Author id mismatch");
         }
+    }
+
+    private void giveRecommendation(RecommendationDto recommendation) {
+        if(recommendation.getContent() == null || recommendation.getContent().isBlank()) {
+            throw new IllegalArgumentException("this content is blank");
+        }
+    }
+
+    private void spamCheck(RecommendationDto recommendation) {
+        List<Recommendation> recommendationList =
+                getAllRecommendationBetweenAuthorIdAndReceiverId(recommendation);
+
+        recommendationList
+                .forEach(recomm -> {
+                    long dateTimeRecomm = ChronoUnit.MONTHS.between(recomm.getCreatedAt(),
+                            LocalDateTime.now());
+
+                    if (dateTimeRecomm < 6) {
+                        throw new IllegalArgumentException("It has not been 6 months since the last recommendation");
+                    }
+                });
     }
 }
