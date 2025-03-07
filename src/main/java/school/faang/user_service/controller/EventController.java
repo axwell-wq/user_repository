@@ -20,12 +20,12 @@ public class EventController {
         return eventService.create(event);
     }
 
-    @GetMapping("/getevent{eventId}")
+    @GetMapping("/getevent/{eventId}")
     public EventDto getEvent(@PathVariable Long eventId) {
         return eventService.getEvent(eventId);
     }
 
-    @DeleteMapping("/delete{eventId}")
+    @DeleteMapping("/delete/{eventId}")
     public void deleteEvent(@PathVariable Long eventId) {
         eventService.deleteEvent(eventId);
     }
@@ -35,12 +35,12 @@ public class EventController {
         return eventService.updateEvent(event);
     }
 
-    @GetMapping("/getownedevents{userId}")
+    @GetMapping("/getownedevents/{userId}")
     public List<EventDto> getOwnedEvents(@PathVariable Long userId) {
         return eventService.getOwnedEvents(userId);
     }
 
-    @GetMapping("/getparticipatedevents{userId}")
+    @GetMapping("/getparticipatedevents/{userId}")
     public List<EventDto> getParticipatedEvents(@PathVariable Long userId) {
         return eventService.getParticipatedEvents(userId);
     }

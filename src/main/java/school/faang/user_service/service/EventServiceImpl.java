@@ -54,17 +54,16 @@ public class EventServiceImpl implements EventService {
 
         List<Skill> skillDtos = event.getRelatedSkills().stream()
                 .map(skillMapper::toEntity)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));;
 
-        eventEntity = Event.builder()
-                .title(event.getTitle())
-                .description(event.getDescription())
-                .relatedSkills(skillDtos)
-                .location(event.getLocation())
-                .maxAttendees(event.getMaxAttendees())
-                .type(event.getType())
-                .status(event.getStatus())
-                .build();
+        eventEntity.setTitle(event.getTitle());
+        eventEntity.setDescription(event.getDescription());
+        eventEntity.setRelatedSkills(skillDtos);
+        eventEntity.setLocation(event.getLocation());
+        eventEntity.setMaxAttendees(event.getMaxAttendees());
+        eventEntity.setType(event.getType());
+        eventEntity.setStatus(event.getStatus());
+
 
         return mapperEventDto.toDto(eventRepository.save(eventEntity));
     }
