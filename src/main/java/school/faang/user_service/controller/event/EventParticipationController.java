@@ -30,7 +30,7 @@ public class EventParticipationController {
     }
 
     @GetMapping("/getparticipantscount/{eventId}")
-    public int getParticipantsCount(@PathVariable long eventId) {
+    public int getParticipantsCount(@PathVariable Long eventId) {
         return eventParticipationService.getParticipantsCount(eventId);
     }
 }
