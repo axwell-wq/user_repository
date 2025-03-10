@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.recommendationRequest;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import school.faang.user_service.mapper.RecommendationRequestMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
 import school.faang.user_service.repository.recommendation.SkillRequestRepository;
+import school.faang.user_service.service.RecommendationRequestService;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;

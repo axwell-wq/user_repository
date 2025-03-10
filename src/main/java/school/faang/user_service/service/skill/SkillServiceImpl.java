@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.skill;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +10,7 @@ import school.faang.user_service.mapper.SkillMapper;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.dto.SkillDto;
+import school.faang.user_service.service.SkillService;
 import school.faang.user_service.validator.recommendation.SkillValidator;
 
 import java.util.List;
