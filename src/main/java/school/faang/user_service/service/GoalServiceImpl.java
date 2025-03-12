@@ -7,6 +7,7 @@ import school.faang.user_service.dto.GoalDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.goal.Goal;
+import school.faang.user_service.entity.goal.GoalStatus;
 import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.MapperGoalDto;
 import school.faang.user_service.repository.SkillRepository;
@@ -14,9 +15,7 @@ import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +33,20 @@ public class GoalServiceImpl implements GoalService {
         addAllSkills(goal);
 
         return mapperGoalDto.toDto(goalRepository.create(goal.getTitle(), goal.getDescription(), goal.getParentId()));
+    }
+
+    public GoalDto updateeGoal(Long goalId, GoalDto goalDto) {
+        Goal goal = goalRepository.findById(goalId).orElseThrow(
+                () -> new EntityNotFoundException("цель не найдена"));
+        if (goal.getStatus() == GoalStatus.COMPLETED) {
+            throw new IllegalArgumentException("цель уже завершена");
+        }
+
+        goal.setTitle(goalDto.getTitle());
+        goal.setDescription(goalDto.getDescription());
+        goal.setParent(goalRepository.findById(goalDto.getParentId()).orElseThrow(
+                () -> new EntityNotFoundException("parent не найден ")));
+        goal.se
     }
 
     private void validateAmountGoals(Long userId) {
