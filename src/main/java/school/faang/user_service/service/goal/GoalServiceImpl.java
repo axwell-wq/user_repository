@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.goal;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import school.faang.user_service.mapper.MapperGoalDto;
 import school.faang.user_service.repository.SkillRepository;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.goal.GoalRepository;
+import school.faang.user_service.service.GoalService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,26 @@ public class GoalServiceImpl implements GoalService {
         goal.setDescription(goalDto.getDescription());
         goal.setParent(goalRepository.findById(goalDto.getParentId()).orElseThrow(
                 () -> new EntityNotFoundException("parent не найден ")));
-        goal.se
+        List<Skill> skills = skillRepository.findAllById(goalDto.getSkillsId());
+        goal.setSkillsToAchieve(skills);
+
+        validateExistsSkills(goalDto);
+
+        updatteSkill(goalDto);
+
+        return mapperGoalDto.toDto(goal);
+    }
+
+    public void deleteGoal(Long goalId) {
+        goalRepository.deleteById(goalId);
+    }
+
+    public List<Goal> findSubtasksByGoalId(Long goalId) {
+        return goalRepository.findByParent(goalId).toList();
+    }
+
+    public List<Goal> getGoalsByUser(Long userId) {
+        return goalRepository.findGoalsByUserId(userId).toList();
     }
 
     private void validateAmountGoals(Long userId) {
@@ -77,5 +97,10 @@ public class GoalServiceImpl implements GoalService {
         for (Skill skill : skills) {
             goalRepository.addSkillToGoal(skill.getId(), goal.getId());
         }
+    }
+
+    private void updatteSkill(GoalDto goalDto) {
+        goalDto.getSkillsId().clear();
+        goalDto.setSkillsId(goalDto.getSkillsId());
     }
 }
