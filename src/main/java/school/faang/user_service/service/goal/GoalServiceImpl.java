@@ -3,6 +3,7 @@ package school.faang.user_service.service.goal;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import school.faang.user_service.dto.GoalDto;
 import school.faang.user_service.entity.Skill;
 import school.faang.user_service.entity.User;
@@ -27,13 +28,18 @@ public class GoalServiceImpl implements GoalService {
     private final UserRepository userRepository;
     private final MapperGoalDto mapperGoalDto;
 
-    public GoalDto createGoal(Long userId, GoalDto goal) {
+    @Transactional
+    public GoalDto createGoal(Long userId, GoalDto goalDto) {
         validateAmountGoals(userId);
-        validateExistsSkills(goal);
+        validateExistsSkills(goalDto);
 
-        addAllSkills(goal);
+        Goal goal = goalRepository.create(goalDto.getTitle(), goalDto.getDescription(), goalDto.getParentId());
 
-        return mapperGoalDto.toDto(goalRepository.create(goal.getTitle(), goal.getDescription(), goal.getParentId()));
+        goalDto.setId(goal.getId());
+
+        addAllSkills(goalDto);
+
+        return mapperGoalDto.toDto(goal);
     }
 
     public GoalDto updateeGoal(Long goalId, GoalDto goalDto) {

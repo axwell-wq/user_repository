@@ -22,7 +22,6 @@ import school.faang.user_service.mapper.MapperSkillOfferDto;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
 import school.faang.user_service.repository.recommendation.SkillOfferRepository;
 import school.faang.user_service.service.recommendation.RecommendationServiceImpl;
-import school.faang.user_service.validator.ValidatorRecommendation;
 
 import java.util.List;
 import java.util.Optional;
