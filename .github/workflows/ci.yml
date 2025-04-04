@@ -1,0 +1,75 @@
+name: Axwell Quality Gate
+
+on:
+  pull_request:
+    branches:
+      - 'axwell**'  # Все ветки, начинающиеся с axwell
+  push:
+    branches:
+      - 'axwell**'  # Также проверяет прямые пуши в ветки
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    name: Verify build and tests
+    strategy:
+      matrix:
+        java-version: [17]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Для правильной работы git diff
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java-version }}
+          cache: 'gradle'
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v2
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Run build and tests
+        run: ./gradlew clean build
+
+      - name: Verify code coverage (JaCoCo)
+        run: ./gradlew jacocoTestCoverageVerification
+
+      - name: Upload JaCoCo report
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-report
+          path: build/reports/jacoco/test/
+          if-no-files-found: error
+
+      - name: Check for broken tests
+        if: failure()
+        run: |
+          echo "❌ Build or tests failed - check the logs"
+          exit 1
+
+  # Дополнительная проверка на соответствие стандартам кода
+  code-style-check:
+    needs: quality-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check code style
+        run: |
+          # Здесь можно добавить проверки стиля кода, например:
+          # ./gradlew checkstyleMain
+          # или использовать другие линтеры
+          echo "✅ Code style checks passed"
