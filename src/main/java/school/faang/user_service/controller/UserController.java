@@ -31,6 +31,7 @@ public class UserController {
                 .build();
     }
 
+
     @GetMapping("/getusersbyids")
     public List<UserDto> getUsersByIds(@RequestParam List<Long> ids) {
         List<User> users = userRepository.findAllById(ids);
