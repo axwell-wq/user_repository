@@ -1,5 +1,7 @@
 package school.faang.user_service.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,9 +16,15 @@ import java.util.List;
 @NoArgsConstructor
 public class GoalDto {
     private Long id;
-    private String title;
-    private String description;
-    private Long parentId;
-    private List<Long> skillsId;
     private GoalStatus status;
+    private Long parentId;
+
+    @NotBlank
+    private String title;
+
+    @NotBlank
+    private String description;
+
+    @NotEmpty
+    private List<Long> skillsId;
 }

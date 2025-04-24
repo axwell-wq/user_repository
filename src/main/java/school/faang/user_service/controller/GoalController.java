@@ -1,6 +1,8 @@
 package school.faang.user_service.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import school.faang.user_service.dto.GoalDto;
 import school.faang.user_service.entity.goal.Goal;
@@ -11,17 +13,18 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/goal")
+@Validated
 public class GoalController {
 
     private final GoalService goalService;
 
     @PostMapping("/create/{userId}")
-    GoalDto createGoal(@PathVariable Long userId,@RequestBody GoalDto goal) {
+    GoalDto createGoal(@PathVariable Long userId,@RequestBody @Valid GoalDto goal) {
         return goalService.createGoal(userId, goal);
     }
 
     @PutMapping("/updatee/{goalId}")
-    GoalDto updateeGoal(@PathVariable Long goalId,@RequestBody GoalDto goalDto) {
+    GoalDto updateeGoal(@PathVariable Long goalId,@RequestBody @Valid GoalDto goalDto) {
         return goalService.updateeGoal(goalId, goalDto);
     }
 

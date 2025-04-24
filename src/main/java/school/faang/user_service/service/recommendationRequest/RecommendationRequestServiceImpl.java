@@ -9,6 +9,7 @@ import school.faang.user_service.dto.RejectionDto;
 import school.faang.user_service.dto.RequestFilterDto;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.recommendation.RecommendationRequest;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.RecommendationRequestMapper;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.recommendation.RecommendationRequestRepository;
@@ -95,7 +96,7 @@ public class RecommendationRequestServiceImpl implements RecommendationRequestSe
                     recommendationRequestDto.getCreatedAt());
 
             if (dateTimeRequest < 6) {
-                throw new IllegalArgumentException("It has not been 6 months since the last request");
+                throw new DataValidationException("It has not been 6 months since the last request");
             }
         }
     }

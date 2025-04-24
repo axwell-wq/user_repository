@@ -11,6 +11,7 @@ import school.faang.user_service.dto.RecommendationDto;
 import school.faang.user_service.dto.SkillOfferDto;
 import school.faang.user_service.entity.recommendation.Recommendation;
 import school.faang.user_service.entity.recommendation.SkillOffer;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.MapperRecommendationDto;
 import school.faang.user_service.mapper.MapperSkillOfferDto;
 import school.faang.user_service.repository.recommendation.RecommendationRepository;
@@ -98,7 +99,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     private void existsSkillOffer(RecommendationDto recommendation) {
         for (SkillOfferDto skill : recommendation.getSkillOffers()) {
             if (!skillOfferRepository.existsById(skill.getId())) {
-                throw new IllegalArgumentException("Skill offer does not exist");
+                throw new DataValidationException("Skill offer does not exist");
             }
         }
     }
@@ -115,13 +116,13 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     private void checkAuthentication(RecommendationDto recommendation, Recommendation recommendationEntity) {
         if (!recommendation.getAuthorId().equals(recommendationEntity.getAuthor().getId())) {
-            throw new IllegalArgumentException("Author id mismatch");
+            throw new DataValidationException("Author id mismatch");
         }
     }
 
     public void giveRecommendation(RecommendationDto recommendation) {
         if(recommendation.getContent() == null || recommendation.getContent().isBlank()) {
-            throw new IllegalArgumentException("this content is blank");
+            throw new DataValidationException("this content is blank");
         }
     }
 
@@ -135,7 +136,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                             recommendation.getCreatedAt());
 
                     if (dateTimeRecomm < 6) {
-                        throw new IllegalArgumentException("It has not been 6 months since the last recommendation");
+                        throw new DataValidationException("It has not been 6 months since the last recommendation");
                     }
                 });
     }

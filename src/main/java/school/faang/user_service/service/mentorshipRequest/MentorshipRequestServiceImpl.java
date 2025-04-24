@@ -8,6 +8,7 @@ import school.faang.user_service.dto.RejectionReasonDto;
 import school.faang.user_service.entity.MentorshipRequest;
 import school.faang.user_service.entity.RequestStatus;
 import school.faang.user_service.entity.User;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.mapper.MapperMentorshipRequestDto;
 import school.faang.user_service.repository.UserRepository;
 import school.faang.user_service.repository.mentorship.MentorshipRequestRepository;
@@ -81,7 +82,7 @@ public class MentorshipRequestServiceImpl implements MentorshipRequestService {
 
     private void checkNotSame(MentorshipRequestDto mentorshipRequestDto) {
         if (mentorshipRequestDto.getRequesterId().equals(mentorshipRequestDto.getReceiverId())) {
-            throw new IllegalArgumentException("Requester id is the same");
+            throw new DataValidationException("Requester id is the same");
         }
     }
     private List<MentorshipRequestDto> getMentorshipRequests(List<MentorshipRequest> mentorshipRequestList) {

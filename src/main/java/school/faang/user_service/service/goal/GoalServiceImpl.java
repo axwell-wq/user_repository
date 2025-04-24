@@ -46,7 +46,7 @@ public class GoalServiceImpl implements GoalService {
         Goal goal = goalRepository.findById(goalId).orElseThrow(
                 () -> new EntityNotFoundException("цель не найдена"));
         if (goal.getStatus() == GoalStatus.COMPLETED) {
-            throw new IllegalArgumentException("цель уже завершена");
+            throw new DataValidationException("цель уже завершена");
         }
 
         goal.setTitle(goalDto.getTitle());
@@ -87,7 +87,7 @@ public class GoalServiceImpl implements GoalService {
     private void validateExistsSkills(GoalDto goal) {
         for (Long id : goal.getSkillsId()) {
             if (!skillRepository.existsById(id)) {
-                throw new IllegalArgumentException("Non-existent ability");
+                throw new DataValidationException("Non-existent ability");
             }
         }
     }
