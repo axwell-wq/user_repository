@@ -26,6 +26,12 @@ spring:
         follower-event-channel:
           name: follower_event
 
+s3:
+  endpoint: http://localhost:9000
+  aws_access_key_id: user
+  aws_secret_access_key: password
+  bucket_name: avatars-bucket
+
 server:
   port: 8080
 

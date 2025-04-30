@@ -42,7 +42,10 @@ dependencies {
     /**
      * Amazon S3
      */
-    implementation("com.amazonaws:aws-java-sdk-s3:1.12.464")
+    implementation("com.amazonaws:aws-java-sdk-s3:1.12.782")
+    implementation("software.amazon.awssdk:s3:2.31.28")
+    implementation("org.imgscalr:imgscalr-lib:4.2")
+    implementation("org.apache.commons:commons-imaging:1.0-alpha3")
 
     /**
      * Swagger
