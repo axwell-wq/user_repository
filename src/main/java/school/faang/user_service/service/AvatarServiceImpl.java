@@ -1,4 +1,4 @@
-package school.faang.user_service.amazons3;
+package school.faang.user_service.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -7,15 +7,15 @@ import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import school.faang.user_service.amazons3.AmazonS3Client;
 import school.faang.user_service.entity.User;
 import school.faang.user_service.entity.UserProfilePic;
+import school.faang.user_service.exception.DataValidationException;
 import school.faang.user_service.repository.UserRepository;
+import school.faang.user_service.service.AvatarService;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
-import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
-import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -31,7 +31,7 @@ import static school.faang.user_service.config.context.UserAvatarConfig.MAX_FILE
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AvatarService {
+public class AvatarServiceImpl implements AvatarService {
 
     @Value("${s3.bucket_name}")
     private String bucketName;
@@ -56,15 +56,42 @@ public class AvatarService {
         return userPic;
     }
 
+    public UserProfilePic updateUserAvatar(MultipartFile file, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (user.getUserProfilePic() != null) {
+            deleteOldAvatars(user.getUserProfilePic());
+        }
+
+        UserProfilePic newProfilePic = uploadAvatar(file, userId);
+
+        user.setUserProfilePic(newProfilePic);
+        userRepository.save(user);
+
+        return newProfilePic;
+    }
+
+    public void deleteUserAvatar(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (user.getUserProfilePic() != null) {
+            deleteOldAvatars(user.getUserProfilePic());
+            user.setUserProfilePic(null);
+            userRepository.save(user);
+        }
+    }
+
     private UserProfilePic uploadAvatar(MultipartFile file, Long userId) {
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("File size exceeds 5MB limit");
+            throw new DataValidationException("File size exceeds 5MB limit");
         }
 
         try {
             BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(file.getBytes()));
             if (originalImage == null) {
-                throw new IllegalArgumentException("Unsupported image format");
+                throw new DataValidationException("Unsupported image format");
             }
 
             String fileExtension = getFileExtension(file.getOriginalFilename());
@@ -135,6 +162,28 @@ public class AvatarService {
             s3Client.createBucket(CreateBucketRequest.builder()
                     .bucket(bucketName)
                     .build());
+        }
+    }
+
+    private void deleteOldAvatars(UserProfilePic oldProfilePic) {
+        if (oldProfilePic == null || oldProfilePic.getFileId() == null) {
+            return;
+        }
+
+        try (S3Client s3Client = amazonS3Client.getS3Client()) {
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(oldProfilePic.getFileId())
+                    .build());
+
+            if (oldProfilePic.getSmallFileId() != null) {
+                s3Client.deleteObject(DeleteObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(oldProfilePic.getSmallFileId())
+                        .build());
+            }
+        } catch (S3Exception e) {
+            log.error("Failed to delete old avatars: {}", e.getMessage());
         }
     }
 }
