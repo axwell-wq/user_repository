@@ -1,4 +1,4 @@
-package school.faang.user_service.service;
+package school.faang.user_service.service.avatar;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +52,7 @@ public class AvatarServiceImpl implements AvatarService {
         user.setUserProfilePic(userPic);
 
         userRepository.save(user);
+        log.info("Аватар успешно создан");
 
         return userPic;
     }
@@ -68,6 +69,7 @@ public class AvatarServiceImpl implements AvatarService {
 
         user.setUserProfilePic(newProfilePic);
         userRepository.save(user);
+        log.info("Аватар обновлен");
 
         return newProfilePic;
     }
@@ -80,6 +82,7 @@ public class AvatarServiceImpl implements AvatarService {
             deleteOldAvatars(user.getUserProfilePic());
             user.setUserProfilePic(null);
             userRepository.save(user);
+            log.info("Аватар успешно удален для пользователя с идентификатором: {}", userId);
         }
     }
 

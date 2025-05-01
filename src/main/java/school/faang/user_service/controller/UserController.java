@@ -29,11 +29,13 @@ public class UserController {
     public ResponseEntity<?> uploadAvatar(@PathVariable Long userId, @RequestParam("file") MultipartFile file) {
         try {
             UserProfilePic result = avatarService.createUserAvatar(file, userId);
+            log.info("Аватара успешно создан");
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (RuntimeException e) {
-            return ResponseEntity.internalServerError().body("Failed to upload avatar");
+            log.info("Ошибка создание аватара");
+            return ResponseEntity.internalServerError().body("Ошибка создания аватара");
         }
     }
 
@@ -42,14 +44,15 @@ public class UserController {
 
         try {
             UserProfilePic result = avatarService.updateUserAvatar(file, userId);
+            log.info("Аватар успешно обновлен");
             return ResponseEntity.ok(result);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (RuntimeException e) {
-            log.error("Failed to update avatar", e);
-            return ResponseEntity.internalServerError().body("Failed to update avatar");
+            log.error("Не удалось обновить аватар", e);
+            return ResponseEntity.internalServerError().body("Не удалось обновить аватар");
         }
     }
 
@@ -57,12 +60,13 @@ public class UserController {
     public ResponseEntity<?> deleteAvatar(@PathVariable Long userId) {
         try {
             avatarService.deleteUserAvatar(userId);
+            log.info("Удаление аватара успешно завершено для пользователя с идентификатором: {}", userId);
             return ResponseEntity.ok().build();
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         } catch (RuntimeException e) {
-            log.error("Failed to delete avatar", e);
-            return ResponseEntity.internalServerError().body("Failed to delete avatar");
+            log.error("Ошибка удаления файла", e);
+            return ResponseEntity.internalServerError().body("Ошибка удаления файла");
         }
     }
 
