@@ -37,6 +37,7 @@ public class UserController {
             log.info("Ошибка создание аватара");
             return ResponseEntity.internalServerError().body("Ошибка создания аватара");
         }
+
     }
 
     @PutMapping("/{userId}/avatar")
